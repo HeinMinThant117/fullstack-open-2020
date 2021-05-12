@@ -2,6 +2,30 @@
 import React, { useState, useEffect } from 'react'
 import phonebookService from './services/phonebooks'
 
+const Notification = ({ message, messageType }) => {
+
+
+
+
+  if (message === null) {
+    return null
+  }
+
+  if (messageType === 'error') {
+    return (
+      <div className="notification error">
+        {message}
+      </div>
+
+    )
+  }
+
+  return (
+    <div className="notification">
+      {message}
+    </div>
+  )
+}
 
 
 const Filter = (props) => {
@@ -60,6 +84,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [newNotification, setNewNotification] = useState(null)
+  const [newNotificationType, setNewNotificationType] = useState('message')
 
   useEffect(() => {
 
@@ -77,7 +103,16 @@ const App = () => {
 
     if (window.confirm(`Delete ${person.name} ?`)) {
       phonebookService.remove(id)
-      .then(setPersons(persons.filter(p => p.id !== id)))
+        .then(setPersons(persons.filter(p => p.id !== id)))
+        .catch(() => {
+          setNewNotificationType('error')
+          setNewNotification(`${person.name} has already been deleted`)
+          setTimeout(() => {
+            setNewNotificationType('message')
+            setNewNotification(null)
+          },5000
+          )
+        })
     }
   }
 
@@ -94,23 +129,28 @@ const App = () => {
 
   const addNewEntry = (event) => {
     event.preventDefault()
-    
+
     const searchedPerson = persons.find(element => element.name === newName)
 
-    
+
 
     if (searchedPerson) {
-      
+
       const nameObject = {
         name: newName,
         number: newNumber
       }
 
-      if(window.confirm(`${newName} is already added. Do you want to update the phone number?`)){
+      if (window.confirm(`${newName} is already added. Do you want to update the phone number?`)) {
         phonebookService.update(searchedPerson.id, nameObject)
-        .then(returnedPerson => {
-          setPersons(persons.map(person => person.id !== searchedPerson.id ? person : returnedPerson))
-        })
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== searchedPerson.id ? person : returnedPerson))
+
+            setNewNotification(`${returnedPerson.name} has been updated`)
+            setTimeout(() => {
+              setNewNotification(null)
+            }, 5000)
+          })
       }
     }
     else {
@@ -124,6 +164,11 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+
+          setNewNotification(`${returnedPerson.name} has been created`)
+          setTimeout(() => {
+            setNewNotification(null)
+          }, 5000)
         })
 
       // axios.post('http://localhost:3001/persons', nameObject)
@@ -138,6 +183,7 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={newNotification} messageType={newNotificationType} />
       <h2>Phonebook</h2>
       <Filter newFilter={newFilter} handleFilterChange={handleFilterChange} />
 
