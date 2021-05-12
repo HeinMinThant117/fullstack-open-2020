@@ -94,13 +94,23 @@ const App = () => {
 
   const addNewEntry = (event) => {
     event.preventDefault()
+    
+    const searchedPerson = persons.find(element => element.name === newName)
 
-    if (persons.find(element => element.name === newName)) {
+    
+
+    if (searchedPerson) {
       
-     
+      const nameObject = {
+        name: newName,
+        number: newNumber
+      }
 
       if(window.confirm(`${newName} is already added. Do you want to update the phone number?`)){
-        
+        phonebookService.update(searchedPerson.id, nameObject)
+        .then(returnedPerson => {
+          setPersons(persons.map(person => person.id !== searchedPerson.id ? person : returnedPerson))
+        })
       }
     }
     else {
