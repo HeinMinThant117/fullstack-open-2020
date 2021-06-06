@@ -90,6 +90,27 @@ test('produce a 400 Bad request when there is no url and title properties', asyn
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
 })
 
+test('a blog can be updated', async() => {
+
+    const blog = {
+        title: 'Jimmy',
+        author: 'Jimmy Changas',
+        url: 'www.jimmy.com',
+        likes: 1234
+    }
+
+    const id = '60bc6325faff88617e5bc83a'
+
+    const updatedNote =  api
+        .put(`/api/blogs/${id}`)
+        .send(blog)
+        .expect(200)
+
+    expect(updatedNote.body).toBe(0)
+
+    // const updatedBlog = await Blog.findByIdAndUpdate('60bc6325faff88617e5bc83a', blog, {new : true})
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
